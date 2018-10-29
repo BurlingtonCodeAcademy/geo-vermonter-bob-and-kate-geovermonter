@@ -1,0 +1,16 @@
+#page-container {
+  display:grid;
+  grid-template-columns: 3fr 1fr;
+  grid-template-rows: 70px 500px;
+  grid-template-areas: 
+              "nav nav"
+              "map-area game-area"
+}
+
+#nav {
+  grid-area: nav
+}
+
+#map-area {
+  grid-area: "map-area"
+}

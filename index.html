@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="index.js"></script>
+  <link rel="stylesheet" type="text/css" media="screen" href="style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+    crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+    crossorigin=""></script>
+  <title>Geo VT</title>
+</head>
+<body>
+  <div id="page-container">
+    <div id="nav"></div>
+    <div id="map-area">
+      <div id="north"><img src=""><br>North</div>
+      <div id="south">South<br><img src=""></div>
+      <div id="east">East<img src=""></div>
+      <div id="west"><img src="">West</div>
+      <div id="map"></div>
+    </div>
+    <div id="game-area">
+      <button id="start">Start</button>
+      <div id="guess-map"></div>
+      <button id="guess">Guess</button>
+      <button id="give-up">I give up!</button>
+    </div>
+  </div>  
+</body>
+</html>
