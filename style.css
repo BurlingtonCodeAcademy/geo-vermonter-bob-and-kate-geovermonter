@@ -1,16 +1,93 @@
 #page-container {
-  display:grid;
-  grid-template-columns: 3fr 1fr;
-  grid-template-rows: 70px 500px;
-  grid-template-areas: 
-              "nav nav"
-              "map-area game-area"
+  display: grid;
+  grid-template-columns: 70% 30%;
+  grid-template-rows: 50px 600px;
+  grid-template-areas:
+      "nav nav"
+      "map-area game-area"
 }
 
 #nav {
-  grid-area: nav
+  grid-area: nav;
+  background-color: pink;
+
 }
 
 #map-area {
-  grid-area: "map-area"
+  grid-area: map-area;
+  background-color: palegoldenrod;
+  display: grid;
+  grid-template-areas: 
+      "north north north"
+      "west map east"
+      "south south south"
+}
+
+#full-map {
+  height: 350px;
+  width: 200px;
+}
+
+#game-area {
+  grid-area: game-area;
+  background-color: lightblue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#map {
+  background-color: green;
+  height: 500px;
+  width: 500px;
+  justify-self: center;
+  align-self: center;
+  padding: 0px;
+  margin: 0px;
+}
+
+.gamebutton {
+  border: 1px solid black;
+  background-color: fuchsia;
+  width: 150px;
+  height: 20px;
+  margin: 5px;
+  text-align: center;
+  border-radius: 5px;
+}
+
+.navbutton {
+  border: 1px solid black;
+  background-color: fuchsia;
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+}
+
+#north {
+  grid-area: north;
+  justify-self: center;
+  text-align: end;
+  align-self: end;
+}
+
+#east {
+  grid-area: east;
+ align-self: center;
+ justify-self: start;
+ text-align: center;
+}
+
+#south {
+  grid-area: south;
+  justify-self: center;
+  align-self: start;
+  text-align: center;
+}
+
+#west {
+  grid-area: west;
+  align-self: center;
+  justify-self: end;
+  text-align: center;
 }

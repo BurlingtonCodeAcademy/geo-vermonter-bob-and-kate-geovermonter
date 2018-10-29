@@ -1,33 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="index.js"></script>
-  <link rel="stylesheet" type="text/css" media="screen" href="style.css"/>
+  <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
     crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
     crossorigin=""></script>
   <title>Geo VT</title>
 </head>
+
 <body>
   <div id="page-container">
-    <div id="nav"></div>
+    <div id="nav">Nav Bar</div>
     <div id="map-area">
-      <div id="north"><img src=""><br>North</div>
-      <div id="south">South<br><img src=""></div>
-      <div id="east">East<img src=""></div>
-      <div id="west"><img src="">West</div>
+      <div id="north" class="navbutton">North</div>
+      <div id="west" class="navbutton">West</div>
       <div id="map"></div>
+      <div id="east" class="navbutton">East</div>
+      <div id="south" class="navbutton">South</div>
     </div>
+
     <div id="game-area">
-      <button id="start">Start</button>
-      <div id="guess-map"></div>
-      <button id="guess">Guess</button>
-      <button id="give-up">I give up!</button>
+      <button id="startgame" class='gamebutton'>Start Game</button>
+      <div id="full-map"></div>
+      <button id="guess" class='gamebutton'>Make Guess</button>
+      <button id="giveup" class='gamebutton'>Give Up</button>
+
     </div>
-  </div>  
+  </div>
+  <script>
+//sets up maps
+let randomLong = (Math.random() * (71.51022535353107 - 73.35218221090553) + 73.35218221090553) * -1;
+let randomLat = Math.random() * (45.00541896831666 - 42.730315121762715) + 42.730315121762715;
+console.log(randomLat);
+console.log(randomLong);
+
+    let myMap = L.map('map').setView([randomLat, randomLong], 16);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }).addTo(myMap);
+
+    let fullMap = L.map('full-map').setView([44.0886, -72.7317], 7)
+    L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
+	maxZoom: 18,
+	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(fullMap);
+
+
+  //game controls:
+const startButton = document.getElementById('startgame');
+const guessButton = document.getElementById('guess');
+const giveUpButton = document.getElementById('giveup');
+startButton.disabled = false;
+guessButton.disabled = false;
+giveUpButton.disabled = false;
+
+startButton.onclick = initalizeGame();
+guessButton.onclick = submitGuess();
+giveUpButton.onclick = giveUp();
+
+function initalizeGame() {
+  startButton.disabled = true;
+  guessButton.disabled = false;
+  giveUpButton.disabled = false;
+  L.map('map').setView([randomLat, randomLong], 16)
+  
+}
+  </script>
 </body>
+
 </html>
