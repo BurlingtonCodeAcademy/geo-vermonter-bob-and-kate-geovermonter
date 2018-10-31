@@ -45,7 +45,6 @@
             center() {
                 return [this.lat, this.long]
             }
-           
         }
 
         const startButton = document.getElementById('startgame');
@@ -98,13 +97,11 @@
             myMap.boxZoom.disable();
             myMap.keyboard.disable();
 
-           
             fullMap.once('click', addMarker);
         }
 
         function randomLat() {
                 let lat = Math.random() * (45.00541896831666 - 42.730315121762715) + 42.730315121762715;
-                
                 return lat;
             }
         function randomLong() {
@@ -155,7 +152,6 @@
         function clear() {
             document.getElementById('info').innerHTML = "";
             fullMap.removeLayer(markers);
-
         }
         // Give Up! - tells user correct location - lat/long, town and county
         // and resets map, disables give up and make guess button, enables start button
