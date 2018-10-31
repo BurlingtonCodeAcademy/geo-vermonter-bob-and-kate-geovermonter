@@ -39,6 +39,3 @@ http.createServer(function (request, response) {
 }).listen(port);
 
 console.log("Listening on port " + port);
-
-
-
