@@ -10,7 +10,16 @@
 #nav {
   grid-area: nav;
   background-color: pink;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+}
 
+#info {
+  width: 300px;
+  padding: 15px;
+  margin: 10px;
 }
 
 #map-area {
