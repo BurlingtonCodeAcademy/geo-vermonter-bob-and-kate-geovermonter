@@ -36,25 +36,25 @@
       </div>
       <div id="highscores">HighScores</div>
     </div>
-    <div id="map-area">
+    <<<<<<< HEAD <div id="map-area">
       <button id="north" class="navbutton">North</button>
       <button id="west" class="navbutton">West</button>
       <div id="map"></div>
       <button id="east" class="navbutton">East</button>
       <button id="south" class="navbutton">South</button>
-    </div>
-    <div id="game-area">
-      <button id="startgame" class='gamebutton'>Start Game</button>
-      <div id="full-map"></div>
-      <button id="guess" class='gamebutton'>Make Guess</button>
-      <button id="giveup" class='gamebutton'>Give Up</button>
+  </div>
+  <div id="game-area">
+    <button id="startgame" class='gamebutton'>Start Game</button>
+    <div id="full-map"></div>
+    <button id="guess" class='gamebutton'>Make Guess</button>
+    <button id="giveup" class='gamebutton'>Give Up</button>
 
-    </div>
+  </div>
   </div>
   </div>
   <script>
     //sets up maps and buttons
-    class Map {
+    class Coordinates {
       constructor(lat, long) {
         this.lat = lat;
         this.long = long;
@@ -62,16 +62,7 @@
       center() {
         return [this.lat, this.long]
       }
-      randomLat() {
-        let lat = Math.random() * (45.00541896831666 - 42.730315121762715) + 42.730315121762715;
-        this.lat = lat;
-        return lat;
-      }
-      randomLong() {
-        let long = (Math.random() * (71.51022535353107 - 73.35218221090553) + 73.35218221090553) * -1;
-        this.long = long;
-        return long;
-      }
+
     }
     const startButton = document.getElementById('startgame');
     const guessButton = document.getElementById('guess');
@@ -109,18 +100,13 @@
     // enables NESW buttons to pan game map
     // clears info bar
     function initalizeGame() {
-      gameMap = new Map();
-      console.log(gameMap);
-      gameMap.lat = gameMap.randomLat()
-      gameMap.long = gameMap.randomLong()
-      randomMap(gameMap);
-      northButton.onclick = goNorth;
-      southButton.onclick = goSouth;
-      giveUpButton.onclick = giveUp;
+      gameMap = new Coordinates(randomLat(), randomLong());
+      console.log("answer coords: " + gameMap.lat, gameMap.long);
+      randomMap();
       startButton.disabled = true;
-      guessButton.disabled = false;
+      guessButton.disabled = true;
       giveUpButton.disabled = false;
-
+      clear();
     };
 
     // generates random location for Game Map
@@ -134,12 +120,57 @@
       myMap.scrollWheelZoom.disable();
       myMap.boxZoom.disable();
       myMap.keyboard.disable();
+
+
+      fullMap.once('click', addMarker);
     }
 
+
+    function randomLat() {
+      let lat = Math.random() * (45.00541896831666 - 42.730315121762715) + 42.730315121762715;
+
+      return lat;
+    }
+    function randomLong() {
+      let long = (Math.random() * (71.51022535353107 - 73.35218221090553) + 73.35218221090553) * -1;
+      return long;
+    }
     // guess location - click small map, or enter county name
     // get location of guess marker and determine error margin
     // record if win/lose
     // record score
+    function addMarker(e) {
+      guess = new Coordinates(e.latlng.lat, e.latlng.lng);
+      console.log("guess: ", guess.lat, guess.long)
+
+      let marker = new L.marker(guess.center(), { draggable: true }).addTo(fullMap);
+      markers = new L.FeatureGroup();
+      marker.addTo(markers);
+      markers.addTo(fullMap);
+      guessButton.disabled = false;
+      marker.on('dragend', function (event) {
+        let marker = event.target;
+        let position = marker.getLatLng();
+        guess.lat = position.lat;
+        guess.long = position.lng;
+        console.log("guess: ", guess.lat, guess.long);
+        showInfo(guess);
+        marker.setLatLng(new L.LatLng(position.lat, position.lng), { draggable: 'true' });
+      });
+      marker.bindPopup("<strong>" + e.latlng + "</strong>").addTo(fullMap).openPopup();
+      showInfo(guess)
+    }
+
+    function submitGuess() {
+      console.log("actual location: ", gameMap.center())
+      console.log("guess location: ", guess.center());
+      guessButton.disabled = true;
+      giveUpButton.disabled = true;
+      startButton.disabled = false;
+      showAnswer();
+
+
+    }
 
     // displays lat and long of game map in nav bar
     function showInfo(map) {
@@ -154,6 +185,16 @@
       giveUpButton.disabled = true;
     }
 
+    function showAnswer() {
+      let answermarker = new L.marker(gameMap.center(), { draggable: false }).addTo(fullMap);
+      markers.addLayer(answermarker);
+      answermarker.bindPopup("<strong>Actual Location</strong>").addTo(fullMap).openPopup();
+    }
+    function clear() {
+      document.getElementById('info').innerHTML = "";
+      fullMap.removeLayer(markers);
+
+    }
 
     //map panning controls
     function goNorth() {
@@ -184,6 +225,7 @@
       myMap.panTo([lat - verticalOffset, long])
     };
 
+  
   </script>
 
 
