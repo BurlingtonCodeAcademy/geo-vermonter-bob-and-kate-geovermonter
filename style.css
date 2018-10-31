@@ -1,7 +1,7 @@
 #page-container {
   display: grid;
   grid-template-columns: 70% 30%;
-  grid-template-rows: 50px 600px;
+  grid-template-rows: 70px 800px;
   grid-template-areas:
       "nav nav"
       "map-area game-area"
@@ -33,8 +33,8 @@
 }
 
 #full-map {
-  height: 350px;
-  width: 200px;
+  height: 750px;
+  width: 450px;
 }
 
 #game-area {
@@ -47,8 +47,8 @@
 
 #map {
   background-color: green;
-  height: 500px;
-  width: 500px;
+  height: 750px;
+  width: 750px;
   justify-self: center;
   align-self: center;
   padding: 0px;

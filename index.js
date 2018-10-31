@@ -38,8 +38,6 @@ http.createServer(function (request, response) {
   response.end();
 }).listen(port);
 
-//game controls:
-
 console.log("Listening on port " + port);
 
 
