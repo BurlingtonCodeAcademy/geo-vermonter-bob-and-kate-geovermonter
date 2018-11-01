@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="index.js"></script>
   <link rel="stylesheet" type="text/css" media="screen" href="style.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
     crossorigin="" />
@@ -52,6 +51,8 @@
     </div>
   </div>
   </div>
+  <script src="https://unpkg.com/@mapbox/leaflet-pip@latest/leaflet-pip.js"></script> 
+  <script src="border.js"></script>
   <script>
     //sets up maps and buttons
     class Coordinates {
@@ -64,6 +65,8 @@
       }
 
     }
+    const vermont = L.geoJSON(border_data);
+
     const startButton = document.getElementById('startgame');
     const guessButton = document.getElementById('guess');
     const giveUpButton = document.getElementById('giveup');
@@ -71,23 +74,10 @@
     const southButton = document.getElementById('south');
     const eastButton = document.getElementById('east');
     const westButton = document.getElementById('west');
+    const infoDiv = document.getElementById('info')
     const verticalOffset = .002;//latitude offset
     const horizontalOffset = .003;//longitude offset
-
-    myMap = L.map('map').setView([44.0886, -72.7317], 8);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-    }).addTo(myMap);
-
-    let fullMap = L.map('full-map').setView([44., -72.7317], 8)
-    L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(fullMap);
-    L.tileLayer('https://korona.geog.uni-heidelberg.de/tiles/adminb/x={x}&y={y}&z={z}', {
-      maxZoom: 19,
-      attribution: 'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(fullMap);
+    let markers = null
 
     //game controls:
     startButton.onclick = initalizeGame;
@@ -98,14 +88,32 @@
     giveUpButton.disabled = true;
 
 
+    myMap = L.map('map').setView([44.0886, -72.7317], 8);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }).addTo(myMap);
+
+
+
+    let fullMap = L.map('full-map').setView([44., -72.7317], 8)
+    L.tileLayer('http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(fullMap);
+    L.tileLayer('https://korona.geog.uni-heidelberg.de/tiles/adminb/x={x}&y={y}&z={z}', {
+      maxZoom: 19,
+      attribution: 'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(fullMap);
+    vermont.addTo(fullMap)
+
+
     // start game, 
     // disables start button, 
     // disables zoom on game map
     // enables NESW buttons to pan game map
     // clears info bar
     function initalizeGame() {
-      gameMap = new Coordinates(randomLat(), randomLong());
-      console.log("answer coords: " + gameMap.lat, gameMap.long);
+      getNewPoint();
       randomMap();
       startButton.disabled = true;
       guessButton.disabled = true;
@@ -117,9 +125,36 @@
       clear();
     };
 
+// generates new point in Vermont
+    function getNewPoint() {
+      let latitude = randomLat();
+      let longitude = randomLong();
+
+      if (isInVT(longitude, latitude)){
+        console.log("in vermont!")
+        mysteryPoint = new Coordinates(latitude, longitude);
+        console.log("answer coords: " + mysteryPoint.lat, mysteryPoint.long)
+      } else {
+        console.log("not in vermont!")
+        getNewPoint();
+      }
+    };
+
+    function isInVT(long, lat) {
+      let result = leafletPip.pointInLayer([long, lat], vermont);
+      console.log("result: " + result)
+      console.log("length of VT array: " + result.length);
+      if(result.length >= 1){
+        return true;
+      } else {
+        console.log("not in vermont coords: " + long, lat)
+        return false;
+      };
+    };
+
     // generates random location for Game Map
     function randomMap() {
-      myMap.panTo([gameMap.lat, gameMap.long]);
+      myMap.panTo([mysteryPoint.lat, mysteryPoint.long]);
       myMap.setZoom(18);
       myMap.removeControl(myMap.zoomControl);
       myMap.dragging.disable();
@@ -133,13 +168,13 @@
 
     function randomLat() {
       let lat = Math.random() * (45.00541896831666 - 42.730315121762715) + 42.730315121762715;
-
       return lat;
     }
     function randomLong() {
       let long = (Math.random() * (71.51022535353107 - 73.35218221090553) + 73.35218221090553) * -1;
       return long;
     }
+
     // guess location - click small map, or enter county name
     // get location of guess marker and determine error margin
     // record if win/lose
@@ -167,7 +202,7 @@
     }
 
     function submitGuess() {
-      console.log("actual location: ", gameMap.center())
+      console.log("actual location: ", mysteryPoint.center())
       console.log("guess location: ", guess.center());
       guessButton.disabled = true;
       giveUpButton.disabled = true;
@@ -182,12 +217,14 @@
 
     function clear() {
       document.getElementById('info').innerHTML = '';
-      fullMap.removeLayer(markers)
+      if (markers){
+        fullMap.removeLayer(markers)
+      }
     }
     // Give Up! - tells user correct location - lat/long, town and county
     // and resets map, disables give up and make guess button, enables start button
     function giveUp() {
-      showInfo(gameMap);
+      showInfo(mysteryPoint);
       startButton.disabled = false;
       guessButton.disabled = true;
       giveUpButton.disabled = true;
@@ -195,7 +232,7 @@
     }
 
     function showAnswer() {
-      let answermarker = new L.marker(gameMap.center(), { draggable: false }).addTo(fullMap);
+      let answermarker = new L.marker(mysteryPoint.center(), { draggable: false }).addTo(fullMap);
       markers.addLayer(answermarker);
       answermarker.bindPopup("<strong>Actual Location</strong>").addTo(fullMap).openPopup();
     };
@@ -203,7 +240,7 @@
 
     //map panning controls
     function goNorth() {
-      //sets initial center to gameMap center
+      //sets initial center to mysteryPoint center
       currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
@@ -217,11 +254,11 @@
     };
 
     function goSouth() {
-      //sets initial center to gameMap center
+      //sets initial center to mysteryPoint center
       currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
-      console.log('you hit the button to go north' + myMap.getCenter())
+      console.log('you hit the button to go south' + myMap.getCenter())
       //moves the map south by ~1/2 a frame
       moveSouth(currentLat, currentLong);
     };
@@ -231,11 +268,11 @@
     };
 
     function goEast() {
-      //sets initial center to gameMap center
+      //sets initial center to mysteryPoint center
       currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
-      console.log('you hit the button to go north' + myMap.getCenter())
+      console.log('you hit the button to go east' + myMap.getCenter())
       //moves the map East by ~1/2 a frame
       moveEast(currentLat, currentLong);
     };
@@ -245,11 +282,11 @@
     };
 
     function goWest() {
-      //sets initial center to gameMap center
+      //sets initial center to mysteryPoint center
       currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
-      console.log('you hit the button to go north' + myMap.getCenter())
+      console.log('you hit the button to go west' + myMap.getCenter())
       //moves the map West by ~1/2 a frame
       moveWest(currentLat, currentLong);
     };

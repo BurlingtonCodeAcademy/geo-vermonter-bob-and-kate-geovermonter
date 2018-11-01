@@ -13,7 +13,7 @@ describe('On initial page load', function () {
       '#info', '#info #latitude', '#info #longitude',
       '#info #county', '#info #town',
       '#score',
-      'button#start', 'button#guess', 'button#quit'
+      'button#start', 'button#guess', 'button#giveup'
     ].forEach((selector) => {
       it('Should have a ' + selector + ' element', function () {
         cy.get(selector); // this will fail if the given element is missing
@@ -25,29 +25,40 @@ describe('On initial page load', function () {
 describe('After clicking start', () => {
   before(() => {
     cy.visit('/');
-    cy.get('button#start').click();
+    cy.get('button#startgame').click();
   });
+
+  it('clears the info box', () => {
+    cy.get('div#info').then((element) => {
+      assert.equal('', element.text());
+    });
+  });//this test will break if we implement an info dropdown
 
   it('the Start button should be disabled', () => {
-    cy.get('button#start').should('be.disabled');
+    cy.get('button#startgame').should('be.disabled');
   });
 
-  it('the Quit button should be enabled', () => {
-    cy.get('button#quit').should('be.enabled');
+  it('the Give Up button should be enabled', () => {
+    cy.get('button#giveup').should('be.enabled');
   });
 
-  it('the Guess button should be enabled', () => {
-    cy.get('button#guess').should('be.enabled');
+  it('the Guess button should be disabled', () => {
+    cy.get('button#guess').should('be.disabled');
   });
 
-  describe('the info fields', () => {
-    ['#info #latitude', '#info #longitude',
-      '#info #county', '#info #town',
-    ].forEach((selector) => {
-      it(selector + ' element should contain a question mark', function () {
-        cy.get(selector).then((element) => {
-          assert.equal('?', element.text());
-        });
+  describe('the guess map on click', () => {
+    before(() => cy.get('#full-map').click());
+    //it('places a marker', expect('markers').to.not.equal(null));
+    it('enables the Guess Button', () => {
+      cy.get('button#guess').should('be.enabled');
+    });
+  });
+
+  describe('the directional buttons', () => {
+    ['#north', '#south', '#east', '#west'].forEach((direction) => {
+      it(direction + ' moves the map', function () {
+        cy.get(direction).click();
+        expect('mysteryPoint.center()').to.not.equal('currentCenter')
       });
     });
   });
