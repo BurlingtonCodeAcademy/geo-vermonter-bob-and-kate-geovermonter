@@ -46,20 +46,41 @@ describe('After clicking start', () => {
     cy.get('button#guess').should('be.disabled');
   });
 
-  describe('the guess map on click', () => {
+  describe('After clicking the guess map,', () => {
     before(() => cy.get('#full-map').click());
-    //it('places a marker', expect('markers').to.not.equal(null));
+    it('places a marker', function () { expect('markers').to.not.equal(null) });
     it('enables the Guess Button', () => {
       cy.get('button#guess').should('be.enabled');
     });
   });
 
-  describe('the directional buttons', () => {
+  describe('After clicking a directional button', () => {
     ['#north', '#south', '#east', '#west'].forEach((direction) => {
       it(direction + ' moves the map', function () {
         cy.get(direction).click();
-        expect('mysteryPoint.center()').to.not.equal('currentCenter')
+        expect(mysteryPoint.lat).to.not.equal(myMap.getCenter().lat)
       });
     });
   });
+
+  describe('After clicking the return button,', () => {
+    before(() => {
+      cy.visit('/');
+      cy.get('button#startgame').click();
+      cy.get('button#north').click();
+      cy.get('button#return').click();
+    })
+    it('Game map returns to original location', function () {
+      expect(mysteryPoint.lat).to.equal(myMap.getCenter().lat)
+      expect(mysteryPoint.long).to.equal(myMap.getCenter().lng)
+
+  
+    })
+  })
 });
+
+
+
+
+
+
