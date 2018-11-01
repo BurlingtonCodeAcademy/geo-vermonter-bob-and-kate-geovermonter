@@ -48,7 +48,9 @@ describe('After clicking start', () => {
 
   describe('the guess map on click', () => {
     before(() => cy.get('#full-map').click());
-    //it('places a marker', expect('markers').to.not.equal(null));
+    it('places a marker', function(){
+      expect('markers').to.not.equal(null)
+    });
     it('enables the Guess Button', () => {
       cy.get('button#guess').should('be.enabled');
     });
