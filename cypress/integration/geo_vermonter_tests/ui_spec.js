@@ -1,4 +1,3 @@
-
 describe('Smoke Test', function () {
   it('Just checks if tests run', function () {
     expect(true).to.equal(true);
@@ -32,7 +31,13 @@ describe('After clicking start', () => {
     cy.get('div#info').then((element) => {
       assert.equal('', element.text());
     });
-  });//this test will break if we implement an info dropdown
+  });
+  
+  it('clears the score area', () => {
+    cy.get('div#highscores').then((element)=>{
+      assert.equal('', element.text())
+    })
+  })
 
   it('the Start button should be disabled', () => {
     cy.get('button#startgame').should('be.disabled');
@@ -46,22 +51,29 @@ describe('After clicking start', () => {
     cy.get('button#guess').should('be.disabled');
   });
 
-  describe('the guess map on click', () => {
+  it('the Return button should be enabled', ()=>{
+    cy.get('button#return').should('be.enabled');
+  })
+
+  describe('After clicking the guess map,', () => {
     before(() => cy.get('#full-map').click());
-    it('places a marker', function(){
-      expect('markers').to.not.equal(null)
-    });
+    it('places a marker', function () { expect('markers').to.not.equal(null) });
     it('enables the Guess Button', () => {
       cy.get('button#guess').should('be.enabled');
     });
+
+    describe('After clicking the guess button,', () => {
+      before(() => cy.get('#guess').click());
+      it('it displays the score', function() {expect('#highscores').to.not.equal(``)})
+    })
   });
 
-  describe('the directional buttons', () => {
+  describe('After clicking a directional button', () => {
     ['#north', '#south', '#east', '#west'].forEach((direction) => {
       it(direction + ' moves the map', function () {
         cy.get(direction).click();
-        expect('mysteryPoint.center()').to.not.equal('currentCenter')
       });
     });
   });
 });
+

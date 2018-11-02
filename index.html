@@ -18,22 +18,9 @@
     <div id="nav">
       <div id="info-dropdown">
         <div id="info">INFO</div>
-        <!--Eventually this will become a dropdown menu
-          <div id="info-dropout">
-          <ul>
-            <li id="latlang">
-              Lat/Long: ?
-            </li>
-            <li id="county">
-              County: ?
-            </li>
-            <li>
-              Town: ?
-            </li>
-          </ul>
-        </div>-->
       </div>
-      <div id="highscores">HighScores</div>
+      <button id="return">RETURN</button>
+      <div id="highscores">Score</div>
     </div>
     <div id="map-area">
       <button id="north" class="navbutton">North</button>
@@ -51,10 +38,9 @@
     </div>
   </div>
   </div>
-  <script src="https://unpkg.com/@mapbox/leaflet-pip@latest/leaflet-pip.js"></script> 
+  <script src="https://unpkg.com/@mapbox/leaflet-pip@latest/leaflet-pip.js"></script>
   <script src="border.js"></script>
   <script>
-    //sets up maps and buttons
     class Coordinates {
       constructor(lat, long) {
         this.lat = lat;
@@ -63,10 +49,8 @@
       center() {
         return [this.lat, this.long]
       }
-
     }
     const vermont = L.geoJSON(border_data);
-
     const startButton = document.getElementById('startgame');
     const guessButton = document.getElementById('guess');
     const giveUpButton = document.getElementById('giveup');
@@ -74,21 +58,25 @@
     const southButton = document.getElementById('south');
     const eastButton = document.getElementById('east');
     const westButton = document.getElementById('west');
+    const returnButton = document.getElementById('return');
     const infoDiv = document.getElementById('info')
     const verticalOffset = .002;//latitude offset
-    const horizontalOffset = .003;//longitude offset
-    let markers = null
+    const horizontalOffset = .003;//longitude offset  
+    let markers = null;
+    let scores = [];
+    const numGames = 5;
+
 
     //game controls:
     startButton.onclick = initalizeGame;
     guessButton.onclick = submitGuess;
     giveUpButton.onclick = giveUp;
-
     guessButton.disabled = true;
     giveUpButton.disabled = true;
+    returnButton.disabled = true;
 
 
-    myMap = L.map('map').setView([44.0886, -72.7317], 8);
+    let myMap = L.map('map').setView([44.0886, -72.7317], 8);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(myMap);
@@ -107,63 +95,62 @@
     vermont.addTo(fullMap)
 
 
-    // start game, 
-    // disables start button, 
-    // disables zoom on game map
-    // enables NESW buttons to pan game map
-    // clears info bar
     function initalizeGame() {
       getNewPoint();
-      randomMap();
+      fullMap.once('click', addMarker);
+
       startButton.disabled = true;
       guessButton.disabled = true;
       giveUpButton.disabled = false;
+      returnButton.disabled = false;
       northButton.onclick = goNorth;
       southButton.onclick = goSouth;
       eastButton.onclick = goEast;
       westButton.onclick = goWest;
+      returnButton.onclick = panToMysteryPoint;
+      myMap.setZoom(18);
+      showMysteryPoint(myMap);
       clear();
     };
 
-// generates new point in Vermont
+    function panToMysteryPoint() {
+      return showMysteryPoint(myMap)
+    }
+
     function getNewPoint() {
       let latitude = randomLat();
       let longitude = randomLong();
 
-      if (isInVT(longitude, latitude)){
-        console.log("in vermont!")
+      if (isInVT(longitude, latitude)) {
         mysteryPoint = new Coordinates(latitude, longitude);
-        console.log("answer coords: " + mysteryPoint.lat, mysteryPoint.long)
+        randomMap();
       } else {
-        console.log("not in vermont!")
         getNewPoint();
       }
     };
 
     function isInVT(long, lat) {
       let result = leafletPip.pointInLayer([long, lat], vermont);
-      console.log("result: " + result)
-      console.log("length of VT array: " + result.length);
-      if(result.length >= 1){
+      if (result.length >= 1) {
         return true;
       } else {
-        console.log("not in vermont coords: " + long, lat)
         return false;
       };
     };
 
-    // generates random location for Game Map
     function randomMap() {
-      myMap.panTo([mysteryPoint.lat, mysteryPoint.long]);
-      myMap.setZoom(18);
-      myMap.removeControl(myMap.zoomControl);
-      myMap.dragging.disable();
-      myMap.touchZoom.disable();
-      myMap.doubleClickZoom.disable();
-      myMap.scrollWheelZoom.disable();
-      myMap.boxZoom.disable();
-      myMap.keyboard.disable();
-      fullMap.once('click', addMarker);
+      showMysteryPoint(myMap);
+      disableMapControls(myMap);
+    }
+
+    function disableMapControls(map) {
+      map.removeControl(map.zoomControl);
+      map.dragging.disable();
+      map.touchZoom.disable();
+      map.doubleClickZoom.disable();
+      map.scrollWheelZoom.disable();
+      map.boxZoom.disable();
+      map.keyboard.disable();
     }
 
     function randomLat() {
@@ -174,66 +161,62 @@
       let long = (Math.random() * (71.51022535353107 - 73.35218221090553) + 73.35218221090553) * -1;
       return long;
     }
+    function showMysteryPoint(map) {
+      map.panTo([mysteryPoint.lat, mysteryPoint.long]);
+    }
 
-    // guess location - click small map, or enter county name
-    // get location of guess marker and determine error margin
-    // record if win/lose
-    // record score
     function addMarker(e) {
       guess = new Coordinates(e.latlng.lat, e.latlng.lng);
-      console.log("guess: ", guess.lat, guess.long)
-
-      let marker = new L.marker(guess.center(), { draggable: true }).addTo(fullMap);
-      markers = new L.FeatureGroup();
-      marker.addTo(markers);
-      markers.addTo(fullMap);
+      markers = new L.FeatureGroup().addTo(fullMap);
+      let marker = new L.marker(guess.center(), { draggable: true }).addTo(fullMap).addTo(markers);
       guessButton.disabled = false;
       marker.on('dragend', function (event) {
         let marker = event.target;
         let position = marker.getLatLng();
         guess.lat = position.lat;
         guess.long = position.lng;
-        console.log("guess: ", guess.lat, guess.long);
-        showInfo(guess);
+        showCoords(guess);
         marker.setLatLng(new L.LatLng(position.lat, position.lng), { draggable: 'true' });
       });
       marker.bindPopup("<strong>" + e.latlng + "</strong>").addTo(fullMap).openPopup();
-      showInfo(guess)
+      showCoords(guess)
     }
 
     function submitGuess() {
-      console.log("actual location: ", mysteryPoint.center())
-      console.log("guess location: ", guess.center());
       guessButton.disabled = true;
       giveUpButton.disabled = true;
       startButton.disabled = false;
       showAnswer();
+      getScore();
     }
 
-    // displays lat and long of game map in nav bar
-    function showInfo(map) {
-      document.getElementById('info').innerHTML = `latitude: ${map.center()[0]}, longitude: ${map.center()[1]}`
-    };
-
+    function showCoords(coords) {
+      document.getElementById('info').innerHTML = `Your guess is: (${coords.center()[0].toPrecision(4)}, ${coords.center()[1].toPrecision(4)})`;
+    }
+  
     function clear() {
       document.getElementById('info').innerHTML = '';
-      if (markers){
+      document.getElementById('highscores').innerHTML = '';
+      if (markers) {
         fullMap.removeLayer(markers)
       }
     }
     // Give Up! - tells user correct location - lat/long, town and county
     // and resets map, disables give up and make guess button, enables start button
     function giveUp() {
-      showInfo(mysteryPoint);
+      showCoords(mysteryPoint);
       startButton.disabled = false;
       guessButton.disabled = true;
       giveUpButton.disabled = true;
       showAnswer();
+      getScore();
     }
 
     function showAnswer() {
       let answermarker = new L.marker(mysteryPoint.center(), { draggable: false }).addTo(fullMap);
-      markers.addLayer(answermarker);
+      if (markers) {
+        markers.addLayer(answermarker);
+      }
       answermarker.bindPopup("<strong>Actual Location</strong>").addTo(fullMap).openPopup();
     };
 
@@ -241,10 +224,9 @@
     //map panning controls
     function goNorth() {
       //sets initial center to mysteryPoint center
-      currentCenter = myMap.getCenter();
+      let currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
-      console.log('you hit the button to go north' + myMap.getCenter())
       //moves the map North by ~1/2 a frame
       moveNorth(currentLat, currentLong);
     };
@@ -255,10 +237,9 @@
 
     function goSouth() {
       //sets initial center to mysteryPoint center
-      currentCenter = myMap.getCenter();
+      let currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
-      console.log('you hit the button to go south' + myMap.getCenter())
       //moves the map south by ~1/2 a frame
       moveSouth(currentLat, currentLong);
     };
@@ -269,10 +250,9 @@
 
     function goEast() {
       //sets initial center to mysteryPoint center
-      currentCenter = myMap.getCenter();
+      let currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
-      console.log('you hit the button to go east' + myMap.getCenter())
       //moves the map East by ~1/2 a frame
       moveEast(currentLat, currentLong);
     };
@@ -283,10 +263,9 @@
 
     function goWest() {
       //sets initial center to mysteryPoint center
-      currentCenter = myMap.getCenter();
+      let currentCenter = myMap.getCenter();
       let currentLat = currentCenter.lat;
       let currentLong = currentCenter.lng;
-      console.log('you hit the button to go west' + myMap.getCenter())
       //moves the map West by ~1/2 a frame
       moveWest(currentLat, currentLong);
     };
@@ -295,10 +274,32 @@
       myMap.panTo([lat, long - horizontalOffset])
     };
 
+    function calculateDistance(){
+      let distance = 69* Math.sqrt((guess.lat - mysteryPoint.lat)*(guess.lat - mysteryPoint.lat) + (guess.long - mysteryPoint.long)*(guess.long - mysteryPoint.long));
+      console.log('distance: ' + distance);
+      return distance;
+    }
+    function getScore(){
+      let distance = calculateDistance();
+      let score = Math.floor((160*160)/(distance*distance));
+      scores.push(score);
+      document.getElementById('highscores').innerHTML = "Score for this game: " + score + "<br> Total Score: " + totalScore();
+      document.getElementById('info').innerHTML += "<br> Only " + distance + " miles away!";
+      return score;
+    }
+
+    function outOfGames(){
+      return scores.length === numGames;
+    }
+
+    function totalScore() {
+      let sum = 0;
+      for(let score of scores){
+        sum += score;
+      }
+      return sum;
+    }
 
   </script>
-
-
 </body>
-
 </html>
