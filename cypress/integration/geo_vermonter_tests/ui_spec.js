@@ -9,15 +9,36 @@ describe('On initial page load', function () {
 
   it('the basic page elements should exist', function () {
     ['#map', 'nav',
-      '#info', '#info #latitude', '#info #longitude',
-      '#info #county', '#info #town',
+      '#info', 
       '#score',
-      'button#start', 'button#guess', 'button#giveup'
+      'button#startgame', 'button#guess', 'button#giveup', 'button#return'
     ].forEach((selector) => {
       it('Should have a ' + selector + ' element', function () {
         cy.get(selector); // this will fail if the given element is missing
       });
     });
+  });
+  it('displays INFO in the info section', () => {
+    cy.get('div#info').then((element) => {
+      assert.equal('INFO', element.text());
+    });
+  });
+  it('displays SCORE in the score section', () => {
+    cy.get('div#highscores').then((element) => {
+      assert.equal('SCORE', element.text());
+    });
+  });
+  it('Start button should be enabled', () => {
+    cy.get('#startgame').should('be.enabled')
+  });
+  it('Return button should be disabled', () => {
+    cy.get('#return').should('be.disabled')
+  });
+  it('Guess button should be disabled', () => {
+    cy.get('#guess').should('be.disabled')
+  });
+  it('Give up button should be disabled', () => {
+    cy.get('#giveup').should('be.disabled')
   });
 });
 
@@ -64,16 +85,37 @@ describe('After clicking start', () => {
 
     describe('After clicking the guess button,', () => {
       before(() => cy.get('#guess').click());
-      it('it displays the score', function() {expect('#highscores').to.not.equal(``)})
-    })
+      it('the score area displays something', function() {expect('#highscores').to.not.equal(``)});
+      it('displays a list of highscores after five guesses', function() {
+        let i = 1
+        while(i < 5) {
+          cy.get('#guess').click();
+          i++
+        };
+        expect('#highscore-box').should('.exist')
+      })
+      //this test will fail until we make the high-score popup on game end
+    });
   });
 
   describe('After clicking a directional button', () => {
     ['#north', '#south', '#east', '#west'].forEach((direction) => {
       it(direction + ' moves the map', function () {
+
+        //not sure how to check map-state without variables, check inner html of  & compare before and after click?
+        // <div id='map'>
+              //<div class='leaflet-pane leaflet-map-pane" style="transform: translate3d(this is what changes when the map pans);">
+              //... more divs ... some are children, not siblings ...
+        //</div>
+        cy.get('#return').click()
+
+        let startingPoint = cy.get('#map').children('.leaflet-map-pane');
         cy.get(direction).click();
+        expect(cy.get('#map').children('.leaflet-map-pane').to.not.equal(startingPoint))
+        //startingpoint returns undefined; not sure why, in index it returns an object
       });
     });
   });
+
 });
 

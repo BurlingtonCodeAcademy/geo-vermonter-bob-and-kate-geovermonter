@@ -20,7 +20,7 @@
         <div id="info">INFO</div>
       </div>
       <button id="return">RETURN</button>
-      <div id="highscores">Score</div>
+      <div id="highscores">SCORE</div>
     </div>
     <div id="map-area">
       <button id="north" class="navbutton">North</button>
@@ -114,6 +114,7 @@
     };
 
     function panToMysteryPoint() {
+      console.log(document.getElementsByClassName('leaflet-map-pane'))
       return showMysteryPoint(myMap)
     }
 
